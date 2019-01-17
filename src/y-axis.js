@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { Text, View } from 'react-native'
-import { Svg, Text as SVGText } from 'react-native-svg'
+import { Svg, G, Text as SVGText } from 'react-native-svg'
 import * as d3Scale from 'd3-scale'
 import * as array from 'd3-array'
 
@@ -67,7 +67,7 @@ class YAxis extends PureComponent {
         const { height, width } = this.state
 
         if (data.length === 0) {
-            return <View style={ style }/>
+            return <View style={ style } />
         }
 
         const values = data.map((item, index) => yAccessor({ item, index }))
@@ -75,8 +75,8 @@ class YAxis extends PureComponent {
         const extent = array.extent([ ...values, min, max ])
 
         const {
-            min = extent[ 0 ],
-            max = extent[ 1 ],
+            min = extent[0],
+            max = extent[1],
         } = this.props
 
         const domain = scale === d3Scale.scaleBand ? values : [ min, max ]
@@ -92,6 +92,13 @@ class YAxis extends PureComponent {
             .map((value, index) => formatLabel(value, index))
             .reduce((prev, curr) => prev.toString().length > curr.toString().length ? prev : curr, 0)
 
+        const extraProps = {
+            y,
+            ticks,
+            width,
+            formatLabel,
+        }
+
         return (
             <View style={ [ style ] }>
                 <View
@@ -100,7 +107,7 @@ class YAxis extends PureComponent {
                 >
                     {/*invisible text to allow for parent resizing*/}
                     <Text
-                        style={{ color: 'transparent', fontSize: svg.fontSize }}
+                        style={{ opacity: 0, fontSize: svg.fontSize }}
                     >
                         {longestValue}
                     </Text>
@@ -113,27 +120,31 @@ class YAxis extends PureComponent {
                             height,
                             width,
                         }}>
-                            {children}
-                            {
-                                // don't render labels if width isn't measured yet,
-                                // causes rendering issues
-                                height > 0 &&
-                                ticks.map((value, index) => {
-                                    return (
-                                        <SVGText
-                                            originY={ y(value) }
-                                            textAnchor={ 'middle' }
-                                            x={ '50%' }
-                                            alignmentBaseline={ 'middle' }
-                                            { ...svg }
-                                            key={ index }
-                                            y={ y(value) }
-                                        >
-                                            {formatLabel(value, index)}
-                                        </SVGText>
-                                    )
-                                })
-                            }
+                            <G>
+                                {React.Children.map(children, child => {
+                                    return React.cloneElement(child, extraProps)
+                                })}
+                                {
+                                    // don't render labels if width isn't measured yet,
+                                    // causes rendering issues
+                                    height > 0 &&
+                                    ticks.map((value, index) => {
+                                        return (
+                                            <SVGText
+                                                originY={ y(value) }
+                                                textAnchor={ 'middle' }
+                                                x={ '50%' }
+                                                alignmentBaseline={ 'middle' }
+                                                { ...svg }
+                                                key={ index }
+                                                y={ y(value) }
+                                            >
+                                                {formatLabel(value, index)}
+                                            </SVGText>
+                                        )
+                                    })
+                                }
+                            </G>
                         </Svg>
                     }
                 </View>
