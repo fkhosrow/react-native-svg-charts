@@ -60,17 +60,11 @@ class Chart extends PureComponent {
             x: xAccessor({ item, index }),
         }))
 
-        const yValues = mappedData.map(item => item.y)
-        const xValues = mappedData.map(item => item.x)
-
-        const yExtent = array.extent([ ...yValues, gridMin, gridMax ])
-        const xExtent = array.extent([ ...xValues ])
-
         const {
-            yMin = yExtent[ 0 ],
-            yMax = yExtent[ 1 ],
-            xMin = xExtent[ 0 ],
-            xMax = xExtent[ 1 ],
+            yMin = yMin,
+            yMax = yMax,
+            xMin = xMin,
+            xMax = xMax,
         } = this.props
 
         //invert range to support svg coordinate system
@@ -120,8 +114,8 @@ class Chart extends PureComponent {
                                 fill={ 'none' }
                                 { ...svg }
                                 d={ paths.path }
-                                animate={ animate }
-                                animationDuration={ animationDuration }
+                                //animate={ animate }
+                                //animationDuration={ animationDuration }
                             />
                             {
                                 React.Children.map(children, child => {
@@ -140,11 +134,7 @@ class Chart extends PureComponent {
 }
 
 Chart.propTypes = {
-    data: PropTypes.oneOfType([
-        PropTypes.arrayOf(PropTypes.object),
-        PropTypes.arrayOf(PropTypes.number),
-        PropTypes.arrayOf(PropTypes.array),
-    ]).isRequired,
+    data: PropTypes.arrayOf(PropTypes.number).isRequired,
     svg: PropTypes.object,
 
     style: PropTypes.any,
@@ -184,7 +174,7 @@ Chart.defaultProps = {
     height: 100,
     curve: shape.curveLinear,
     contentInset: {},
-    numberOfTicks: 10,
+    numberOfTicks: 1,
     xScale: scale.scaleLinear,
     yScale: scale.scaleLinear,
     xAccessor: ({ index }) => index,
